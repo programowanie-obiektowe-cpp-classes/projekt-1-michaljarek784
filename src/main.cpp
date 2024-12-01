@@ -179,28 +179,26 @@ class Kredyt
 class Firma
 {
     protected:
-    double stan_konta;//stan konta firmy
-    int liczba_kredytow;//aktualna liczba kredytów
+    double stan_konta_;//stan konta firmy
     vector<unique_ptr<Pracownik>> pracownicy;//wektor pracowników
-    int liczba_pracownikow;//aktualna liczba pracowników
-    int liczba_magazynierow;
-    int liczba_inzynierow;
-    int liczba_marketerow;
-    int liczba_robotnikow;
-    static const int limit_pracownikow=40;//limit liczby pracowników
+    int liczba_pracownikow_;//aktualna liczba pracowników
+    int liczba_magazynierow_;
+    int liczba_inzynierow_;
+    int liczba_marketerow_;
+    int liczba_robotnikow_;
+    static const int limit_pracownikow_=40;//limit liczby pracowników
     static const int N=12;//Liczba miesięcy do obliczania średniego przychodu
     vector<unique_ptr<double>> przychody_historia;
-    int obecny_miesiac=0;//indeks na bieżący miesiąc
-    double magazyn = 0; // Liczba produktów w magazynie
-    double przychody = 0; // Przychód w danym miesiącu
+    int obecny_miesiac_=0;//indeks na bieżący miesiąc
+    double magazyn_ = 0; // Liczba produktów w magazynie
     vector<unique_ptr<Kredyt>> kredyty;  // lista zaciągniętych kredytów
-    static const int limit_kredytow=5;//limit liczby kredytów
+    static const int limit_kredytow_=1;//limit liczby kredytów
     static constexpr double M=5.0; // mnożnik dla zadłużenia
-    static const int max_czas_splaty=24; //maksymalny czas spłaty kredytu (w miesiacach)
+    static const int max_czas_splaty_=24; //maksymalny czas spłaty kredytu (w miesiacach)
 
     public:
-    Firma(double stan=10000.0): stan_konta(stan),liczba_kredytow(0), liczba_pracownikow(4), liczba_magazynierow(1),
-    liczba_inzynierow(1),liczba_marketerow(1),liczba_robotnikow(1){
+    Firma(double stan=10000.0): stan_konta_(stan), liczba_pracownikow_(4), liczba_magazynierow_(1),
+    liczba_inzynierow_(1),liczba_marketerow_(1),liczba_robotnikow_(1){
         pracownicy.push_back(make_unique<Inz>("Mechaniczny Energetyki i Lotnictwa"));
         pracownicy.push_back(make_unique<Mkt>(100));
         pracownicy.push_back(make_unique<Mag>(true));
@@ -224,7 +222,7 @@ class Firma
 
     void zatrudnij(const unique_ptr<Pracownik> pracownik)
     {
-        if(liczba_pracownikow>=limit_pracownikow)
+        if(liczba_pracownikow_>=limit_pracownikow_)
         {
             cout<<"Limit liczby pracownikow osiagniety, nie mozna zatrudnic wiecej osob\n";
             return;
@@ -233,25 +231,25 @@ class Firma
         if (auto inzynier=dynamic_cast<Inz*>(pracownik.get())) 
         {
             pracownicy.push_back( make_unique<Inz>(*inzynier));
-            liczba_inzynierow++;
+            liczba_inzynierow_++;
         }
         else if(auto magazynier=dynamic_cast<Mag*>(pracownik.get()))
             {
             pracownicy.push_back(make_unique<Mag>(*magazynier));
-            liczba_magazynierow++;
+            liczba_magazynierow_++;
             }
             else if(auto marketer=dynamic_cast<Mkt*>(pracownik.get()))
                 {
                     pracownicy.push_back(make_unique<Mkt>(*marketer));
-                    liczba_marketerow++;
+                    liczba_marketerow_++;
                 }
                 else
                 {   
                     auto robotnik=dynamic_cast<Rob*>(pracownik.get());
                     pracownicy.push_back(make_unique<Rob>(*robotnik));
-                    liczba_robotnikow++;
+                    liczba_robotnikow_++;
                 }  
-        liczba_pracownikow++;
+        liczba_pracownikow_++;
     }
 
     double wynagrodzenie() const
@@ -271,29 +269,29 @@ class Firma
 
     double pojemnosc_magazynu() const
     {
-        double pojemnosc_magazynu=liczba_magazynierow * Mag::CMag;
+        double pojemnosc_magazynu=liczba_magazynierow_ * Mag::CMag;
         return pojemnosc_magazynu;
     }
 
     double cena_produktu() const
     {   
-        double cena=liczba_inzynierow*Inz::CI;
+        double cena=liczba_inzynierow_*Inz::CI;
         return cena;
     }
 
     double popyt() const
     {
-        double pop=liczba_marketerow*Mkt::CMkt;
+        double pop=liczba_marketerow_*Mkt::CMkt;
         return pop;
     }
 
-    double get_stan_konta() const {
-        return stan_konta;
+    double get_stan_konta_() const {
+        return stan_konta_;
     }
 
     double oblicz_przychody(){
         double teor_produkty, fakt_produkty, liczba_sprzedanych, przychod;
-        teor_produkty=liczba_robotnikow*Rob::CR;
+        teor_produkty=liczba_robotnikow_*Rob::CR;
         if(teor_produkty<pojemnosc_magazynu())
         {
             fakt_produkty=teor_produkty;
@@ -303,7 +301,7 @@ class Firma
             fakt_produkty=pojemnosc_magazynu();
         }
 
-        magazyn+=fakt_produkty;
+        magazyn_+=fakt_produkty;
 
         if(popyt()<fakt_produkty)
         {
@@ -314,15 +312,15 @@ class Firma
             liczba_sprzedanych=fakt_produkty;
         }
 
-        magazyn-=liczba_sprzedanych;
+        magazyn_-=liczba_sprzedanych;
 
         przychod=liczba_sprzedanych*cena_produktu();
 
-        *przychody_historia[obecny_miesiac]=przychod;
+        *przychody_historia[obecny_miesiac_]=przychod;
 
-        obecny_miesiac+=1;
+        obecny_miesiac_+=1;
 
-        if(obecny_miesiac==N+1) obecny_miesiac=1;
+        if(obecny_miesiac_==N+1) obecny_miesiac_=1;
 
         return przychod;
     }
@@ -340,9 +338,9 @@ class Firma
 
     bool zaciagnij_kredyt(double kwota, int czas_splaty)
     {
-        if(czas_splaty>max_czas_splaty)
+        if(czas_splaty>max_czas_splaty_)
         {
-            cout<<"Nie mozna zaciagnac kredytu na dluzej niz "<<max_czas_splaty<<"miesiec.\n";
+            cout<<"Nie mozna zaciagnac kredytu na dluzej niz "<<max_czas_splaty_<<"miesiec.\n";
             return false;
         }
 
@@ -358,14 +356,14 @@ class Firma
             return false;
         }
         
-        if(kredyty.size()>limit_kredytow)
+        if(kredyty.size()>limit_kredytow_)
         {
             cout<<"Limit kredytow zostal osiagniety.\n";
             return false;
         }
 
         kredyty.push_back(make_unique<Kredyt>(kwota, czas_splaty));
-        stan_konta+=kwota;
+        stan_konta_+=kwota;
         cout<<"Zaciagnieto kredyt o wysokosc: "<<kwota<<" na "<<czas_splaty<<" miesiecy.\n";
         return true;
     }
@@ -392,9 +390,9 @@ class Firma
         for(const auto& kredyt :kredyty)
         {
             double rata=kredyt->miesieczna_rata();
-            if(stan_konta>=rata && kredyt->pozostale_raty()>0)
+            if(stan_konta_>=rata && kredyt->pozostale_raty()>0)
             {
-                stan_konta-=rata;
+                stan_konta_-=rata;
                 kredyt->zaplata_raty();
                 cout<<"Zaplacono rate kredytu: "<< rata<<" zl.\n";
             } else if(kredyt->pozostale_raty()==0 && !kredyt_splacony){
@@ -437,15 +435,15 @@ class Firma
 
         dochod=oblicz_przychody()-wynagrodzenie()-rata_kredytow;
 
-        stan_konta+=dochod;
+        stan_konta_+=dochod;
 
         cout<<"Dochod za obecny miesiac wynosi: "<<dochod<<" zl.\n";
-        cout<<"Nowy stan konta wynosi: "<<stan_konta<<" zl.\n";
+        cout<<"Nowy stan konta wynosi: "<<stan_konta_<<" zl.\n";
         return;
     }
 
     void stan_magazynu() const {
-        cout << "Aktualny stan magazynu: " << magazyn << " produktow.\n";
+        cout << "Aktualny stan magazynu: " << magazyn_ << " produktow.\n";
     }
 
 };
@@ -454,8 +452,8 @@ class Gra
 {
     private:
     Firma firma;
-    double wartosc_docelowa;
-    bool trwanie_gry;
+    double wartosc_docelowa_;
+    bool trwanie_gry_;
 
     void menu()
     {
@@ -482,14 +480,14 @@ class Gra
         cout<<"Aktualna wartosc firmy wynosi: "<<wartosc_spolki<<" zl.\n";
         firma.stan_magazynu();
 
-        if(firma.get_stan_konta()<0)
+        if(firma.get_stan_konta_()<0)
         {
             cout<<"Twoja firma zbankrutowala! Gra zakonczona.\n";
-            trwanie_gry=false;
-        } else if(wartosc_spolki>=wartosc_docelowa)
+            trwanie_gry_=false;
+        } else if(wartosc_spolki>=wartosc_docelowa_)
         {
             cout<<"Gratulacje! Osiagnales wartosc docelowa firmy i wygrales gre!\n";
-            trwanie_gry=false;
+            trwanie_gry_=false;
         }
     }
 
@@ -556,7 +554,7 @@ class Gra
             zakoncz_ture();
         } else if(akcja=="exit")
         {
-            trwanie_gry=false;
+            trwanie_gry_=false;
         }
          else 
         {
@@ -566,16 +564,16 @@ class Gra
 
     public:
 
-    Gra(): firma(100000.0), wartosc_docelowa(100000.0), trwanie_gry(true){}
+    Gra(): firma(100000.0), wartosc_docelowa_(100000.0), trwanie_gry_(true){}
 
     void start()
     {
         cout<<"Witaj w grze ekonowicznej!\n";
-        cout<<"Twoim celem jest osiagniecie wartosci firmy na poziomie "<< wartosc_docelowa << " zl.\n";
+        cout<<"Twoim celem jest osiagniecie wartosci firmy na poziomie "<< wartosc_docelowa_ << " zl.\n";
         cout<<"Rozpoczynasz z poczatkowym stanem konta 100 000 zl.\n";
 
         menu();
-        while(trwanie_gry)
+        while(trwanie_gry_)
         {
             string wybor;
             cout<<"Wykonaj akcje: ";
